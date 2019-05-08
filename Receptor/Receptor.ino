@@ -20,20 +20,25 @@ void loop() {
     antena.read(result,result);
     switch(result){
       case 1:
+      //Acao1
       break;
       case 2:
+      //Acao2
       break;
       case 3:
+      //Acao3
       break;
       case 4:
+      //Acao4
       break;
       default:
+      //AcaoPadrao caso os casos aceima não sejam atendidos
       break;
     }   
    } else{Serial.print("Erro ao se comunicar");} 
   }
 
-void Avacar(){
+void Avancar(){
     
   }
 void Recuar(){
