@@ -1,11 +1,12 @@
-#include <nRF24L01.h>
-#include <RF24.h>
-#include <RF24_config.h>
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
 
 
 
-RF24 antena(9,10);
-const byte ENDRECO[6] = "111222";
+
+RF24 radio(9,10);
+const int pipe = 0xE8E8F0F0E1LL;
 const int ButtonA = 2;//UP
 const int ButtonB = 3;//RIGHT
 const int ButtonC = 4;//DOWN
@@ -16,39 +17,41 @@ const int ButtonSelect = 8;//Select
 const byte Analog_X = 0;
 const byte Analog_Y = 1;
 
-int vrButtonArray[] = {0,0,0,0};
+int dados;
 
 void setup() {
-Serial.begin(9600);
-antena.begin();
-antena.openReadingPipe(0,ENDRECO);
-antena.setPALevel(RF24_PA_HIGH);
-antena.startListening();
+ Serial.begin(57600);
+radio.begin();
+radio.stopListening();
+radio.setPALevel(RF24_PA_LOW);
+radio.setDataRate( RF24_250KBPS );
+radio.openWritingPipe(pipe);
+radio.printDetails();
 
-pinMode(ButtonA, INPUT);
-pinMode(ButtonB, INPUT);
-pinMode(ButtonC, INPUT);
-pinMode(ButtonD, INPUT);
+pinMode(ButtonA, INPUT_PULLUP);
+pinMode(ButtonB, INPUT_PULLUP);
+pinMode(ButtonC,INPUT_PULLUP);
+pinMode(ButtonD, INPUT_PULLUP);
 
 }
 
 void loop() {
-  lerButtons();  
-  antena.write(agenteButton(),agenteButton());
-}
-
-int agenteButton(){
-  if((vrButtonArray[0]==1)&&(vrButtonArray[1]==0)&&(vrButtonArray[2]==0)&&(vrButtonArray[3]==0))return "1";
- else if((vrButtonArray[0]==0)&&(vrButtonArray[1]==1)&&(vrButtonArray[2]==0)&&(vrButtonArray[3]==0))return "2";
-  else if((vrButtonArray[0]==0)&&(vrButtonArray[1]==0)&&(vrButtonArray[2]==2)&&(vrButtonArray[3]==0))return "3";
-  else if((vrButtonArray[0]==0)&&(vrButtonArray[1]==0)&&(vrButtonArray[2]==0)&&(vrButtonArray[3]==3))return "4";
-  else return "99";
-}
-
- 
-void lerButtons(){
-  vrButtonArray[0] = digitalRead (ButtonA);
-  vrButtonArray[1] = digitalRead (ButtonB);
-  vrButtonArray[2] = digitalRead (ButtonC);
-  vrButtonArray[3] = digitalRead (ButtonD);
+  if(digitalRead (ButtonA)==0){
+    dados = 1;    
+  } else if(digitalRead (ButtonB) == 0){
+     dados = 2;
+  } else if(digitalRead (ButtonC) ==0){
+    dados = 3;
+  } else if(digitalRead (ButtonD) == 0){
+    dados = 4;
+  } else{
+   dados = 5;
+  }
+  bool ok = radio.write(&dados,dados);
+  if(ok){
+    Serial.println("Sucess");
+  } else{Serial.println("FAIL");}
+  Serial.println(dados);
+  radio.printDetails();
+  delay(100);
 }

@@ -1,53 +1,39 @@
-#include <nRF24L01.h>
-#include <RF24.h>
-#include <RF24_config.h>
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
 
 
-RF24 antena(9,10);
-const byte ENDRECO[6] = "111222";
-int result = "";
+
+
+RF24 radio(9,10);
+const int pipe = 0xE8E8F0F0E1LL;
+int dados;
 
 void setup() {
-Serial.begin(9600);
-antena.begin();
-antena.openReadingPipe(0,ENDRECO);
-antena.setPALevel(RF24_PA_HIGH);
-antena.startListening();
+Serial.begin(57600);
+radio.begin();
+radio.setDataRate( RF24_250KBPS );
+radio.setPALevel(RF24_PA_LOW);
+radio.openReadingPipe(1,pipe);
+radio.startListening();
+radio.setRetries(15,15);
+radio.printDetails();
 }
 
 void loop() {
-  if(antena.available()){
-    antena.read(result,result);
-    switch(result){
-      case 1:
-      //Acao1
+  if(radio.available()){
+     bool ok = radio.read(&dados,dados);
+     if(ok){
+      switch(dados){
+      case 5:
+      Serial.println("F");
       break;
-      case 2:
-      //Acao2
-      break;
-      case 3:
-      //Acao3
-      break;
-      case 4:
-      //Acao4
-      break;
-      default:
-      //AcaoPadrao caso os casos aceima não sejam atendidos
-      break;
-    }   
-   } else{Serial.print("Erro ao se comunicar");} 
-  }
-
-void Avancar(){
-    
-  }
-void Recuar(){
-    
-  }
-void Direita(){
-    
-  }
-void Esquerda(){
-    
+     }} else {
+      Serial.println("Erro");  
+     }
+     
+       
+   }else{Serial.println(dados);} 
+   delay(100);
   }
 
