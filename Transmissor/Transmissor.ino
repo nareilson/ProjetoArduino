@@ -6,7 +6,8 @@
 
 
 RF24 radio(9,10);
-const int pipe = 0xE8E8F0F0E1LL;
+//const int pipe = 0xE8E8F0F0E1LL;
+const uint64_t pipe = 0xE8E8F0F0E1LL;
 const int ButtonA = 2;//UP
 const int ButtonB = 3;//RIGHT
 const int ButtonC = 4;//DOWN
@@ -18,15 +19,16 @@ const byte Analog_X = 0;
 const byte Analog_Y = 1;
 
 int dados;
+bool ok;
 
 void setup() {
  Serial.begin(57600);
 radio.begin();
-radio.stopListening();
+radio.openWritingPipe(pipe);
 radio.setPALevel(RF24_PA_LOW);
 radio.setDataRate( RF24_250KBPS );
-radio.openWritingPipe(pipe);
-radio.printDetails();
+radio.stopListening();
+//radio.printDetails();
 
 pinMode(ButtonA, INPUT_PULLUP);
 pinMode(ButtonB, INPUT_PULLUP);
@@ -47,11 +49,6 @@ void loop() {
   } else{
    dados = 5;
   }
-  bool ok = radio.write(&dados,dados);
-  if(ok){
-    Serial.println("Sucess");
-  } else{Serial.println("FAIL");}
-  Serial.println(dados);
-  radio.printDetails();
-  delay(100);
+  radio.write(&dados,sizeof(dados));
+//  radio.printDetails();
 }
